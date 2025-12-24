@@ -85,7 +85,7 @@ class VoiceAssistant:
         else:
             greeting = "Good evening!"
         
-        self.speak(f"{greeting} How can I assist you today?")
+        self.speak(f"{greeting} I am Chanakya, your voice assistant. How can I assist you today?")
 
     def listen_for_command(self):
         """
@@ -302,7 +302,7 @@ class VoiceAssistant:
         
         # --- Who are you ---
         elif "who are you" in command or "what is your name" in command:
-            self.speak("I am your personal voice assistant. I'm here to help you with various tasks.")
+            self.speak("I am Chanakya, your personal voice assistant. I'm here to help you with various tasks and control your PC.")
         
         # --- Exit Command ---
         elif "exit" in command or "quit" in command or "stop" in command or "goodbye" in command:

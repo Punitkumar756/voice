@@ -127,7 +127,7 @@ function displayError(message) {
 // Add some animations on load
 window.addEventListener('load', () => {
     setTimeout(() => {
-        responseBox.innerHTML = '<p class="greeting">✨ Voice Assistant Ready! Say "Hello" to begin.</p>';
+        responseBox.innerHTML = '<p class="greeting">✨ Chanakya is Ready! Say "Hello" to begin.</p>';
     }, 500);
 });
 
