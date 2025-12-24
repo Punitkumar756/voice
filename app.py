@@ -81,7 +81,7 @@ class VoiceAssistantWeb:
         
         # Core Commands
         if "hello" in command or "hi" in command:
-            response = "Hello! It's nice to hear from you."
+            response = "Hello! I'm Chanakya. It's nice to hear from you."
             action = "greeting"
         
         elif "time" in command:
@@ -251,6 +251,6 @@ def execute():
         return jsonify({"status": "error", "response": f"Error: {str(e)}"})
 
 if __name__ == '__main__':
-    print("Starting Voice Assistant Web Interface...")
+    print("Starting Chanakya - Voice Assistant Web Interface...")
     print("Open your browser to: http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)
