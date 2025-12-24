@@ -1,5 +1,10 @@
 # 🎯 Chanakya - AI Voice Assistant
 
+<div align="center">
+  <img src="static/logo.png" alt="Chanakya Logo" width="250"/>
+  <br><br>
+</div>
+
 A powerful, feature-rich voice-controlled assistant named **Chanakya** with a stunning web interface. Control your PC, manage applications, and execute commands using your voice or text input with beautiful animations and modern design.
 
 ![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)
