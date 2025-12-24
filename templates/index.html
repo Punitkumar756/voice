@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background">
+        <div class="circle circle1"></div>
+        <div class="circle circle2"></div>
+        <div class="circle circle3"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <h1>AI Voice Assistant</h1>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Ready</span>
+            </div>
+        </header>
+
+        <main>
+            <div class="assistant-avatar">
+                <div class="avatar-circle" id="avatarCircle">
+                    <i class="fas fa-microphone" id="micIcon"></i>
+                </div>
+                <div class="sound-waves" id="soundWaves">
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                </div>
+            </div>
+
+            <div class="response-area">
+                <div class="response-box" id="responseBox">
+                    <p class="greeting">Hello! I'm your AI voice assistant. Click the microphone to start or type a command below.</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="voice-btn" id="voiceBtn">
+                    <i class="fas fa-microphone"></i>
+                    <span>Click to Speak</span>
+                </button>
+                
+                <div class="text-input-container">
+                    <input type="text" id="textInput" placeholder="Or type your command here..." />
+                    <button class="send-btn" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="command-suggestions">
+                <h3>Try these commands:</h3>
+                <div class="suggestions-grid">
+                    <button class="suggestion-btn" onclick="executeCommand('what time is it')">
+                        <i class="fas fa-clock"></i> What time is it?
+                    </button>
+                    <button class="suggestion-btn" onclick="executeCommand('open calculator')">
+                        <i class="fas fa-calculator"></i> Open Calculator
+                    </button>
+                    <button class="suggestion-btn" onclick="executeCommand('take screenshot')">
+                        <i class="fas fa-camera"></i> Take Screenshot
+                    </button>
+                    <button class="suggestion-btn" onclick="executeCommand('tell me a joke')">
+                        <i class="fas fa-laugh"></i> Tell a Joke
+                    </button>
+                    <button class="suggestion-btn" onclick="executeCommand('volume up')">
+                        <i class="fas fa-volume-up"></i> Volume Up
+                    </button>
+                    <button class="suggestion-btn" onclick="executeCommand('list windows')">
+                        <i class="fas fa-window-restore"></i> List Windows
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by AI • Voice Recognition Active</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
