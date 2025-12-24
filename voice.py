@@ -11,6 +11,9 @@ import pyautogui
 import requests
 import json
 from pathlib import Path
+import re
+import psutil
+import ctypes
 
 class VoiceAssistant:
     """
@@ -144,6 +147,75 @@ class VoiceAssistant:
         # --- Open Applications ---
         elif "open" in command:
             self.handle_open_application(command)
+        
+        # --- Close Applications ---
+        elif "close" in command:
+            self.handle_close_application(command)
+        
+        # --- Window Management ---
+        elif "list windows" in command or "show windows" in command or "open windows" in command:
+            self.list_open_windows()
+        elif "switch to" in command or "switch window" in command:
+            self.switch_window(command)
+        elif "minimize window" in command or "minimize" in command:
+            self.speak("Minimizing current window.")
+            pyautogui.hotkey('win', 'down')
+        elif "maximize window" in command or "maximize" in command:
+            self.speak("Maximizing current window.")
+            pyautogui.hotkey('win', 'up')
+        
+        # --- Universal Keyboard Shortcuts ---
+        elif "copy" in command and "paste" not in command:
+            pyautogui.hotkey('ctrl', 'c')
+            self.speak("Copied.")
+        elif "paste" in command:
+            pyautogui.hotkey('ctrl', 'v')
+            self.speak("Pasted.")
+        elif "cut" in command:
+            pyautogui.hotkey('ctrl', 'x')
+            self.speak("Cut.")
+        elif "undo" in command:
+            pyautogui.hotkey('ctrl', 'z')
+            self.speak("Undone.")
+        elif "redo" in command:
+            pyautogui.hotkey('ctrl', 'y')
+            self.speak("Redone.")
+        elif "save" in command and "screenshot" not in command:
+            pyautogui.hotkey('ctrl', 's')
+            self.speak("Saved.")
+        elif "select all" in command:
+            pyautogui.hotkey('ctrl', 'a')
+            self.speak("Selected all.")
+        elif "find" in command or "search" in command and "google" not in command and "for" not in command:
+            pyautogui.hotkey('ctrl', 'f')
+            self.speak("Opening find dialog.")
+        elif "print" in command:
+            pyautogui.hotkey('ctrl', 'p')
+            self.speak("Opening print dialog.")
+        elif "new tab" in command:
+            pyautogui.hotkey('ctrl', 't')
+            self.speak("Opening new tab.")
+        elif "close tab" in command:
+            pyautogui.hotkey('ctrl', 'w')
+            self.speak("Closing tab.")
+        elif "refresh" in command or "reload" in command:
+            pyautogui.hotkey('ctrl', 'r')
+            self.speak("Refreshing.")
+        
+        # --- Task Manager ---
+        elif "task manager" in command or "open task manager" in command:
+            pyautogui.hotkey('ctrl', 'shift', 'esc')
+            self.speak("Opening task manager.")
+        
+        # --- Lock Computer ---
+        elif "lock" in command and "computer" in command:
+            self.speak("Locking computer.")
+            ctypes.windll.user32.LockWorkStation()
+        
+        # --- Alt+Tab ---
+        elif "switch application" in command or "next window" in command:
+            pyautogui.hotkey('alt', 'tab')
+            self.speak("Switching application.")
         
         # --- Volume Control ---
         elif "volume up" in command or "increase volume" in command:
@@ -293,11 +365,14 @@ class VoiceAssistant:
 
     def handle_open_application(self, command):
         """
-        Opens applications based on voice command.
+        Opens applications based on voice command - now searches entire system.
         """
         try:
-            # Common applications mapping
-            apps = {
+            # Extract app name from command
+            app_name = command.replace("open", "").strip()
+            
+            # First try common quick apps
+            quick_apps = {
                 "notepad": "notepad.exe",
                 "calculator": "calc.exe",
                 "paint": "mspaint.exe",
@@ -305,6 +380,7 @@ class VoiceAssistant:
                 "edge": "msedge.exe",
                 "firefox": "firefox.exe",
                 "explorer": "explorer.exe",
+                "file explorer": "explorer.exe",
                 "word": "winword.exe",
                 "excel": "excel.exe",
                 "powerpoint": "powerpnt.exe",
@@ -312,26 +388,171 @@ class VoiceAssistant:
                 "visual studio code": "code",
                 "spotify": "spotify.exe",
                 "discord": "discord.exe",
-                "steam": "steam.exe"
+                "steam": "steam.exe",
+                "cmd": "cmd.exe",
+                "command prompt": "cmd.exe",
+                "powershell": "powershell.exe",
+                "control panel": "control.exe",
+                "settings": "ms-settings:"
             }
             
-            app_opened = False
-            for app_name, app_exe in apps.items():
-                if app_name in command:
-                    self.speak(f"Opening {app_name}.")
+            # Check quick apps first
+            for app_key, app_exe in quick_apps.items():
+                if app_key in app_name.lower():
+                    self.speak(f"Opening {app_key}.")
                     try:
-                        subprocess.Popen(app_exe, shell=True)
-                        app_opened = True
-                        break
+                        if app_exe == "ms-settings:":
+                            os.system("start ms-settings:")
+                        else:
+                            subprocess.Popen(app_exe, shell=True)
+                        return
                     except Exception as e:
-                        print(f"Error opening {app_name}: {e}")
-                        self.speak(f"Sorry, I couldn't open {app_name}. Make sure it's installed.")
+                        print(f"Error opening {app_key}: {e}")
             
-            if not app_opened:
-                self.speak("I'm not sure which application you want to open.")
+            # If not found in quick apps, search system
+            self.speak(f"Searching for {app_name}.")
+            found_app = self.find_application(app_name)
+            
+            if found_app:
+                self.speak(f"Opening {app_name}.")
+                try:
+                    subprocess.Popen(found_app, shell=True)
+                except Exception as e:
+                    print(f"Error opening {found_app}: {e}")
+                    self.speak(f"Found {app_name} but couldn't open it.")
+            else:
+                self.speak(f"Sorry, I couldn't find {app_name} on your system.")
+                
         except Exception as e:
             print(f"Error in handle_open_application: {e}")
             self.speak("Sorry, I encountered an error while trying to open the application.")
+    
+    def find_application(self, app_name):
+        """
+        Searches the system for an application by name.
+        """
+        try:
+            # Common installation directories
+            search_paths = [
+                Path(os.environ.get('ProgramFiles', 'C:\\Program Files')),
+                Path(os.environ.get('ProgramFiles(x86)', 'C:\\Program Files (x86)')),
+                Path(os.environ.get('LOCALAPPDATA', '')),
+                Path(os.environ.get('APPDATA', '')),
+                Path.home() / 'AppData' / 'Local' / 'Programs',
+            ]
+            
+            # Search for .exe files matching the app name
+            for search_path in search_paths:
+                if not search_path.exists():
+                    continue
+                    
+                # Search up to 3 levels deep
+                for depth in range(3):
+                    pattern = '*/' * depth + '*.exe'
+                    for exe_file in search_path.glob(pattern):
+                        exe_name = exe_file.stem.lower()
+                        if app_name.lower() in exe_name or exe_name in app_name.lower():
+                            return str(exe_file)
+            
+            return None
+        except Exception as e:
+            print(f"Error searching for application: {e}")
+            return None
+    
+    def handle_close_application(self, command):
+        """
+        Closes an application by name.
+        """
+        try:
+            app_name = command.replace("close", "").strip()
+            
+            if not app_name or app_name == "window":
+                # Close current window
+                pyautogui.hotkey('alt', 'f4')
+                self.speak("Closing current window.")
+                return
+            
+            # Find and close process
+            closed = False
+            for proc in psutil.process_iter(['name']):
+                try:
+                    proc_name = proc.info['name'].lower()
+                    if app_name.lower() in proc_name:
+                        proc.terminate()
+                        self.speak(f"Closed {app_name}.")
+                        closed = True
+                        break
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+            
+            if not closed:
+                self.speak(f"Couldn't find {app_name} running.")
+                
+        except Exception as e:
+            print(f"Error closing application: {e}")
+            self.speak("Sorry, I couldn't close that application.")
+    
+    def list_open_windows(self):
+        """
+        Lists all open windows/applications.
+        """
+        try:
+            windows = []
+            for proc in psutil.process_iter(['name']):
+                try:
+                    proc_name = proc.info['name']
+                    if proc_name.endswith('.exe') and proc_name not in windows:
+                        windows.append(proc_name.replace('.exe', ''))
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+            
+            if windows:
+                # Get first 5 most relevant apps (exclude system processes)
+                filtered = [w for w in windows if w.lower() not in ['svchost', 'system', 'registry', 'csrss', 'winlogon', 'services']]
+                top_windows = filtered[:5]
+                
+                self.speak(f"Open applications: {', '.join(top_windows)}")
+            else:
+                self.speak("No applications currently running.")
+                
+        except Exception as e:
+            print(f"Error listing windows: {e}")
+            self.speak("Sorry, I couldn't list the windows.")
+    
+    def switch_window(self, command):
+        """
+        Switches to a specific window by name.
+        """
+        try:
+            app_name = command.replace("switch to", "").replace("switch window", "").strip()
+            
+            if not app_name:
+                # Just alt+tab if no specific app mentioned
+                pyautogui.hotkey('alt', 'tab')
+                self.speak("Switching window.")
+                return
+            
+            # Try to bring window to front
+            found = False
+            for proc in psutil.process_iter(['name', 'pid']):
+                try:
+                    proc_name = proc.info['name'].lower()
+                    if app_name.lower() in proc_name:
+                        # Use alt+tab multiple times to cycle through windows
+                        pyautogui.hotkey('alt', 'tab')
+                        time.sleep(0.2)
+                        self.speak(f"Switching to {app_name}.")
+                        found = True
+                        break
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+            
+            if not found:
+                self.speak(f"Couldn't find {app_name} running.")
+                
+        except Exception as e:
+            print(f"Error switching window: {e}")
+            self.speak("Sorry, I couldn't switch windows.")
 
     def adjust_volume(self, action):
         """
