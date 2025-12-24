@@ -8,16 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="background">
-        <div class="circle circle1"></div>
-        <div class="circle circle2"></div>
-        <div class="circle circle3"></div>
-    </div>
-
     <div class="container">
         <header>
             <div class="logo">
-                <i class="fas fa-robot"></i>
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Chanakya Logo" class="logo-img">
                 <h1>Chanakya</h1>
             </div>
             <div class="status-indicator">
@@ -28,21 +22,19 @@
 
         <main>
             <div class="assistant-avatar">
+                <div class="sound-wave"></div>
+                <div class="sound-wave"></div>
+                <div class="sound-wave"></div>
                 <div class="avatar-circle" id="avatarCircle">
-                    <i class="fas fa-microphone" id="micIcon"></i>
-                </div>
-                <div class="sound-waves" id="soundWaves">
-                    <div class="wave"></div>
-                    <div class="wave"></div>
-                    <div class="wave"></div>
-                    <div class="wave"></div>
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Chanakya" class="avatar-logo">
+                    <div class="microphone-icon">
+                        <i class="fas fa-microphone"></i>
+                    </div>
                 </div>
             </div>
 
-            <div class="response-area">
-                <div class="response-box" id="responseBox">
-                    <p class="greeting">Hello! I'm Chanakya, your AI voice assistant. Click the microphone to start or type a command below.</p>
-                </div>
+            <div class="response-box" id="responseBox">
+                <p class="greeting">Hello! I'm Chanakya, your AI voice assistant. Click the button to start or type a command below.</p>
             </div>
 
             <div class="controls">
@@ -51,17 +43,15 @@
                     <span>Click to Speak</span>
                 </button>
                 
-                <div class="text-input-container">
+                <div class="text-input-group">
                     <input type="text" id="textInput" placeholder="Or type your command here..." />
-                    <button class="send-btn" id="sendBtn">
+                    <button id="executeBtn">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="command-suggestions">
-                <h3>Try these commands:</h3>
-                <div class="suggestions-grid">
+            <div class="suggestions">
                     <button class="suggestion-btn" onclick="executeCommand('what time is it')">
                         <i class="fas fa-clock"></i> What time is it?
                     </button>
@@ -80,13 +70,8 @@
                     <button class="suggestion-btn" onclick="executeCommand('list windows')">
                         <i class="fas fa-window-restore"></i> List Windows
                     </button>
-                </div>
             </div>
         </main>
-
-        <footer>
-            <p>Chanakya - Powered by AI • Voice Recognition Active</p>
-        </footer>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
